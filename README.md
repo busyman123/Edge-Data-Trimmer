@@ -15,7 +15,7 @@ Key Value Metrics
 • Industry-Standard Visualization: Outputs spec-compliant .mcap containers compatible with Foxglove Studio and the included Streamlit OEM ROI & Replay Console.
 
 2. System Architecture
-
+```text
 ┌────────────────────────────────────────────────────────────────────────────┐
 │                        VEHICLE EDGE NODE (C++20)                           │
 │                                                                            │
@@ -49,8 +49,8 @@ Key Value Metrics
 │          (dashboard.py)                 (adas_trimmer_layout.json)         │
 │                                                                            │
 └────────────────────────────────────────────────────────────────────────────┘
-
-Core Software Components
+```
+# Core Software Components
 
 
 Component	File	Responsibility
@@ -64,7 +64,7 @@ OEM ROI & Replay Console	dashboard.py	Interactive Streamlit web application calc
 
 3. Directory Structure
 
-text """
+```text
 Native-Edge-Data-Trimmer/
 ├── CMakeLists.txt               # C++20 build configuration linking Arrow & Parquet
 ├── src/
@@ -80,7 +80,7 @@ Native-Edge-Data-Trimmer/
 ├── cloud_receiver.py            # Cloud ingestion service (listens on 127.0.0.1:7447)
 ├── dashboard.py                 # Streamlit executive ROI calculator & event replay viewer
 └── adas_trimmer_layout.json     # Pre-configured 3-panel Foxglove Studio layout template
-"""
+```
 
 4. Prerequisites & Installation
 
@@ -137,7 +137,7 @@ Use code with caution.
 6. MCAP Telemetry Channels & Visualization
 
 Each exported .mcap event slice contains five synchronized topics:
-text """
+```text
 # Topic Name	            |     Schema Type	            |       Content Description
 /vehicle/telemetry	        | waymo.Telemetry (JSON)	    |  Ego longitudinal speed (m/s), acceleration (m/s²)      
                             |                               |    , active track count, and anomaly_triggered pulse (0/1).
@@ -149,7 +149,7 @@ text """
                             |                               |    timestamp.
 /diagnostics/anomaly_log    |	foxglove.Log	            | Human-readable trigger root-cause logs (level: 4 ERROR on anomaly 
                             |                               |    frames).
-"""                            
+```                          
 
 
 Visualizing in Foxglove Studio
