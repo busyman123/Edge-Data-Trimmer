@@ -67,8 +67,23 @@ OEM ROI & Replay Console	dashboard.py	Interactive Streamlit web application calc
 ```text
 Native-Edge-Data-Trimmer/
 ├── CMakeLists.txt               # C++20 build configuration linking Arrow & Parquet
+├── include/
+│   ├── edge_trimmer/
+│   │   ├── types.hpp              # TrackedObject3D, JoinedSensorFrame
+│   │   ├── math_utils.hpp         # safe_num, base64_encode
+│   │   ├── mcap_writer.hpp        # NativeMcapWriter class declaration
+│       └── parquet_cursor.hpp     # LidarBoxStreamCursor & Parquet joiner declarations
+|       ├── flash_storage.hpp      # CircularFlashStorage (header-only ring buffer)
+│       ├── socket_uplink.hpp      # Socket streaming declarations
+│       └── smart_trimmer.hpp      # EdgeSmartTrimmer orchestrator declarations
+|       ├── track_monitor.hpp      # TrackContinuityMonitor (35m safety zone)
+|       └── waymo_pipeline.hpp     # Scene discovery & multi-table lockstep joiner
 ├── src/
-│   └── main.cpp                 # Core edge trimmer, Parquet joiners, MCAP writer, socket uplink
+│   ├── main.cpp                   # CLI entry point, socket uplink, main event loop
+│   ├── mcap_writer.cpp            # NativeMcapWriter binary serialization logic
+│   └── parquet_cursor.cpp         # Arrow/Parquet streaming & batch joining logic
+|   ├── socket_uplink.cpp          # POSIX TCP client implementation
+    └── smart_trimmer.cpp          # Anomaly detection, MCAP export & ROI summary
 ├── data/
 │   └── waymo_v2/                # Modular Waymo Open Dataset v2 Parquet inputs
 │       ├── vehicle_pose/
@@ -81,6 +96,12 @@ Native-Edge-Data-Trimmer/
 ├── dashboard.py                 # Streamlit executive ROI calculator & event replay viewer
 └── adas_trimmer_layout.json     # Pre-configured 3-panel Foxglove Studio layout template
 ```
+
+
+# Why This Structure Works Best
+
+• Faster incremental builds: Changing socket logic or anomaly thresholds in src/main.cpp no longer forces CMake to recompile heavy <arrow/api.h> and <parquet/arrow/reader.h> headers.
+• Clean encapsulation: Platform-specific socket headers (<arpa/inet.h>, <sys/socket.h>) stay isolated in src/main.cpp (or a dedicated socket_uplink.cpp) rather than leaking into data models.
 
 4. Prerequisites & Installation
 
