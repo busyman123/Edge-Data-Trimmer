@@ -106,9 +106,9 @@ source .venv/bin/activate
 pip install streamlit pandas plotly
 ```
 
-    - Dataset Preparation:
+- Dataset Preparation:
 Place matching Waymo Open Dataset v2 segment .parquet files (identical filenames) into 
-    - ./data/waymo_v2/vehicle_pose/ and 
+    - ./data/waymo_v2/vehicle_pose/
     - ./data/waymo_v2/lidar_box/
     - ./data/waymo_v2/camera_image/ 
     - ./data/waymo_v2/lidar/
