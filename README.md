@@ -1,18 +1,17 @@
-
 # Edge-Native ADAS Smart-Trimmer & Cloud Replay Pipeline
 
 A zero-copy C++20 edge middleware prototype designed to eliminate cloud ingestion bottlenecks for ADAS and Autonomous Driving fleets.
 
 1. Executive Summary & Problem Statement
 
-Automotive test and L2+ customer fleets generate terabytes of multi-sensor data daily across cameras, LiDAR, radar, and vehicle CAN buses. Uploading, storing, and annotating 100% of raw highway miles is financially unsustainable and buries engineering teams in uninformative logs.
-The Edge-Native ADAS Smart-Trimmer runs directly on the vehicle's compute platform. It buffers multi-modal sensor streams inside a strict byte-bounded memory ring, continuously monitors kinematics and 3D perception track continuity, and extracts only high-value anomaly windows (e.g., hard braking, phantom braking, or sudden 3D track dropouts) into compact, Foxglove-ready .mcap containers for edge-to-cloud uplink.
+- Automotive test and L2+ customer fleets generate terabytes of multi-sensor data daily across cameras, LiDAR, radar, and vehicle CAN buses. Uploading, storing, and annotating 100% of raw highway miles is financially unsustainable and buries engineering teams in uninformative logs.
+- The Edge-Native ADAS Smart-Trimmer runs directly on the vehicle's compute platform. It buffers multi-modal sensor streams inside a strict byte-bounded memory ring, continuously monitors kinematics and 3D perception track continuity, and extracts only high-value anomaly windows (e.g., hard braking, phantom braking, or sudden 3D track dropouts) into compact, Foxglove-ready .mcap containers for edge-to-cloud uplink.
 
-Key Value Metrics
+    Key Value Metrics
 
-• Bandwidth & Cloud Storage Reduction: Cuts cloud data ingestion and annotation costs by 80% to 98%+ by discarding nominal driving at the edge.
-• Deterministic Edge Footprint: Operates inside a fixed memory cap (e.g., 512 MB ring cache) using zero-copy std::shared_ptr semantics and streaming Apache Parquet cursors.
-• Industry-Standard Visualization: Outputs spec-compliant .mcap containers compatible with Foxglove Studio and the included Streamlit OEM ROI & Replay Console.
+- Bandwidth & Cloud Storage Reduction: Cuts cloud data ingestion and annotation costs by 80% to 98%+ by discarding nominal driving at the edge.
+- Deterministic Edge Footprint: Operates inside a fixed memory cap (e.g., 512 MB ring cache) using zero-copy std::shared_ptr semantics and streaming Apache Parquet cursors.
+- Industry-Standard Visualization: Outputs spec-compliant .mcap containers compatible with Foxglove Studio and the included Streamlit OEM ROI & Replay Console.
 
 2. System Architecture
 ```text
@@ -50,17 +49,6 @@ Key Value Metrics
 │                                                                            │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
-# Core Software Components
-
-
-Component	File	Responsibility
-Multi-Table Joiner	src/main.cpp	Streams vehicle_pose, lidar_box, camera_image, and lidar Parquet files in chronological lockstep with flat RAM usage.
-Track Continuity Monitor	src/main.cpp	Compares 3D LiDAR object IDs across consecutive frames (t-1 vs. t) to detect sudden perception dropouts within a 35-meter radius.
-Circular Flash Storage	src/main.cpp	Enforces strict byte and frame ceilings (max_flash_mb, window_sec), automatically evicting oldest frames until a trigger fires.
-Native MCAP Writer	src/main.cpp	Zero-dependency MCAP v0 binary writer serializing telemetry, foxglove.SceneUpdate 3D cubes, foxglove.CompressedImage JPEGs, and foxglove.Log diagnostics.
-Cloud Uplink Receiver	cloud_receiver.py	Lightweight TCP ingestion daemon receiving trimmed .mcap slices from the edge node into ./cloud_bucket/.
-OEM ROI & Replay Console	dashboard.py	Interactive Streamlit web application calculating annual fleet cost savings and replaying 3D bird's-eye-view trajectories and dashcam frames.
-
 
 3. Directory Structure
 
@@ -97,63 +85,70 @@ Native-Edge-Data-Trimmer/
 └── adas_trimmer_layout.json     # Pre-configured 3-panel Foxglove Studio layout template
 ```
 
-
-# Why This Structure Works Best
-
-• Faster incremental builds: Changing socket logic or anomaly thresholds in src/main.cpp no longer forces CMake to recompile heavy <arrow/api.h> and <parquet/arrow/reader.h> headers.
-• Clean encapsulation: Platform-specific socket headers (<arpa/inet.h>, <sys/socket.h>) stay isolated in src/main.cpp (or a dedicated socket_uplink.cpp) rather than leaking into data models.
-
 4. Prerequisites & Installation
 
 
 System Dependencies (Ubuntu 22.04 LTS)
 
-1. Apache Arrow & Parquet C++ Libraries:bash
+- Apache Arrow & Parquet C++ Libraries:bash
+```
 wget https://apache.org
 sudo apt install -y ./apache-arrow-apt-source-latest-jammy.deb
 sudo apt update
 sudo apt install -y libarrow-dev libparquet-dev cmake g++-13
+```
 
-2. Python Dashboard Dependencies:bash
+- Python Dashboard Dependencies:bash
+
+```
 python3 -m venv .venv
 source .venv/bin/activate
 pip install streamlit pandas plotly
+```
 
-3. Dataset Preparation:
-Place matching Waymo Open Dataset v2 segment .parquet files (identical filenames) into ./data/waymo_v2/vehicle_pose/ and ./data/waymo_v2/lidar_box/ (and optionally camera_image/ and lidar/).
+    - Dataset Preparation:
+Place matching Waymo Open Dataset v2 segment .parquet files (identical filenames) into 
+    - ./data/waymo_v2/vehicle_pose/ and 
+    - ./data/waymo_v2/lidar_box/
+    - ./data/waymo_v2/camera_image/ 
+    - ./data/waymo_v2/lidar/
 
 5. Build & Execution Guide
-
 
 Step 1: Compile the C++20 Edge Binary
 
 bash
+```
 mkdir -p build && cd build
 cmake -DCMAKE_CXX_COMPILER=g++-13 ..
 make -j$(nproc)
 cd ..
-Use code with caution.
+```
+
 
 Step 2: Start the Cloud Ingestion Receiver (Terminal 1)
-
-bash
+```
 python3 cloud_receiver.py
-Use code with caution.
+```
 
 Step 3: Launch the Streamlit ROI & Replay Console (Terminal 2)
-
-bash
+```
 streamlit run dashboard.py
-Use code with caution.
+```
 
 Step 4: Run the Edge Smart-Trimmer (Terminal 3)
 
-• Standard Pass-Through Mode (scans real logs for organic hard braking or 3D track dropouts):bash
+- Standard Pass-Through Mode (scans real logs for organic hard braking or 3D track dropouts):bash
+```
 ./build/waymo_edge_trimmer
-Use code with caution.
-• Synthetic Fault Injection Mode (deterministically injects a -6.8 m/s² phantom brake and drops a tracked 3D vehicle ID at frame 100 for live demos):bash
+```
+
+- Synthetic Fault Injection Mode (deterministically injects a -6.8 m/s² phantom brake and drops a tracked 3D vehicle ID at frame 100 for live demos):bash
+```
 ./build/waymo_edge_trimmer --inject-fault
-Use code with caution.
+```
+
+
 
 6. MCAP Telemetry Channels & Visualization
 
@@ -175,9 +170,9 @@ Each exported .mcap event slice contains five synchronized topics:
 
 Visualizing in Foxglove Studio
 
-1. Open Foxglove Studio and drag any .mcap file from ./cloud_bucket/ or ./trimmed_events/ onto the window.
-2. Click Layout -> Import from file… and select adas_trimmer_layout.json.
-3. Press Play (Spacebar) to inspect the synchronized dashcam video, 3D LiDAR bounding boxes (base_link), and kinematic deceleration spike.
+- Open Foxglove Studio and drag any .mcap file from ./cloud_bucket/ or ./trimmed_events/ onto the window.
+- Click Layout -> Import from file… and select adas_trimmer_layout.json.
+- Press Play (Spacebar) to inspect the synchronized dashcam video, 3D LiDAR bounding boxes (base_link), and kinematic deceleration spike.
 
 7. Configuration & Tuning Parameters
 
