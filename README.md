@@ -177,9 +177,9 @@ Visualizing in Foxglove Studio
 7. Configuration & Tuning Parameters
 
 Adjust these parameters inside src/main.cpp to match target hardware or demo scenarios:
-• max_flash_mb (Default: 512): Maximum RAM/NVMe flash footprint allocated to the circular buffer.
-• window_sec (Default: 30 or 6): Total context duration captured per anomaly (window_sec / 2 pre-trigger + window_sec / 2 post-trigger). Set to 6 seconds when benchmarking single 20-second Waymo clips.
-• decel_threshold_ (Default: -4.5f m/s²): Longitudinal deceleration threshold for flagging emergency or phantom braking events.
-• critical_radius_meters_ (Default: 35.0 m): Safety bubble radius around the ego vehicle used by TrackContinuityMonitor to filter out benign far-field track exits.
+- max_flash_mb (Default: 512): Maximum RAM/NVMe flash footprint allocated to the circular buffer.
+- window_sec (Default: 30 or 6): Total context duration captured per anomaly (window_sec / 2 pre-trigger + window_sec / 2 post-trigger) set to 6 seconds when benchmarking single 20-second Waymo clips.
+- decel_threshold_ (Default: -4.5f m/s²): Longitudinal deceleration threshold for flagging emergency or phantom braking events.
+- critical_radius_meters_ (Default: 35.0 m): Safety bubble radius around the ego vehicle used by TrackContinuityMonitor to filter out benign far-field track exits.
 
 
